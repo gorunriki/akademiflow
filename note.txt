@@ -1,0 +1,10 @@
+------INIT BRANCH
+git checkout -b test/hello
+git add README.md
+git commit -m "test: hello branch"
+git push origin test/hello
+------MERGE
+git checkout main
+git merge test/hello
+git push
+git branch -d test/hello
