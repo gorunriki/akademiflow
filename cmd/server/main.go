@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/gorunriki/akademiflow/pkg/config"
+)
 
 func main() {
-	fmt.Println("School Management System API")
+	cfg := config.Load()
+	fmt.Println("App:", cfg.AppName)
+	fmt.Println("Running on port", cfg.AppPort)
 }
