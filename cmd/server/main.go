@@ -23,6 +23,9 @@ func main() {
 	sqlDB.SetMaxOpenConns(10)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
+	// DB migrate
+	database.Migrate(db)
+
 	//init Gin
 	r := gin.Default()
 
