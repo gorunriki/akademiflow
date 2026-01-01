@@ -21,6 +21,7 @@ func Load() *Config {
 		DBUser:     os.Getenv("DB_USER"),
 		DBPassword: os.Getenv("DB_PASSWORD"),
 		DBName:     os.Getenv("DB_NAME"),
+		DBSSLMode:  os.Getenv("DB_SSLMODE"),
 		JWTSecret:  os.Getenv("JWT_SECRET"),
 	}
 }

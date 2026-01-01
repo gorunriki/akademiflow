@@ -9,6 +9,7 @@ type Config struct {
 	DBUser     string
 	DBPassword string
 	DBName     string
+	DBSSLMode  string
 
 	JWTSecret string
 }

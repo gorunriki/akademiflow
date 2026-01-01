@@ -2,13 +2,28 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorunriki/akademiflow/pkg/config"
+	"github.com/gorunriki/akademiflow/pkg/database"
 )
 
 func main() {
+	// init .env
 	cfg := config.Load()
+
+	// init DB
+	db := database.Connect(cfg)
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sqlDB.SetMaxIdleConns(5)
+	sqlDB.SetMaxOpenConns(10)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
+	//init Gin
 	r := gin.Default()
 
 	r.GET("/health", func(c *gin.Context) {
