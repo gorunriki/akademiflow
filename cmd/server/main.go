@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorunriki/akademiflow/pkg/config"
@@ -15,16 +14,10 @@ func main() {
 
 	// init DB
 	db := database.Connect(cfg)
-	sqlDB, err := db.DB()
-	if err != nil {
-		log.Fatal(err)
-	}
-	sqlDB.SetMaxIdleConns(5)
-	sqlDB.SetMaxOpenConns(10)
-	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	// DB migrate
 	database.Migrate(db)
+	database.Seed(db)
 
 	//init Gin
 	r := gin.Default()
