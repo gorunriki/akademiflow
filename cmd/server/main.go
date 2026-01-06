@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorunriki/akademiflow/internal/modules/auth"
 	"github.com/gorunriki/akademiflow/pkg/config"
 	"github.com/gorunriki/akademiflow/pkg/database"
 )
@@ -14,6 +15,10 @@ func main() {
 
 	// init DB
 	db := database.Connect(cfg)
+
+	authRepo := auth.NewRepository(db)
+	authService := auth.NewService(authRepo, cfg)
+	authHandler := auth.NewHandler(authService)
 
 	// DB migrate
 	database.Migrate(db)
@@ -28,6 +33,8 @@ func main() {
 			"app":    cfg.AppName,
 		})
 	})
+
+	r.POST("/login", authHandler.Login)
 
 	port := cfg.AppPort
 	if port == "" {

@@ -11,5 +11,6 @@ type Config struct {
 	DBName     string
 	DBSSLMode  string
 
-	JWTSecret string
+	JWTSecret    string
+	JWTExpiredIn string
 }
