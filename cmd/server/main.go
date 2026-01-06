@@ -5,6 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorunriki/akademiflow/internal/modules/auth"
+	"github.com/gorunriki/akademiflow/internal/modules/users"
+	"github.com/gorunriki/akademiflow/internal/shared/middleware"
 	"github.com/gorunriki/akademiflow/pkg/config"
 	"github.com/gorunriki/akademiflow/pkg/database"
 )
@@ -19,6 +21,10 @@ func main() {
 	authRepo := auth.NewRepository(db)
 	authService := auth.NewService(authRepo, cfg)
 	authHandler := auth.NewHandler(authService)
+
+	userRepo := users.NewRepository(db)
+	userService := users.NewService(userRepo)
+	userHandler := users.NewHandler(userService)
 
 	// DB migrate
 	database.Migrate(db)
@@ -35,6 +41,11 @@ func main() {
 	})
 
 	r.POST("/login", authHandler.Login)
+
+	api := r.Group("/api")
+	api.Use(middleware.Auth(cfg))
+
+	api.GET("/me", userHandler.Me)
 
 	port := cfg.AppPort
 	if port == "" {
