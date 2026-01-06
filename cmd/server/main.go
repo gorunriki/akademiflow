@@ -45,6 +45,15 @@ func main() {
 	api := r.Group("/api")
 	api.Use(middleware.Auth(cfg))
 
+	adminOnly := api.Group("/admin")
+	adminOnly.Use(middleware.RequiredRole("admin"))
+
+	adminOnly.GET("/dashboard", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "welcome admin",
+		})
+	})
+
 	api.GET("/me", userHandler.Me)
 
 	port := cfg.AppPort
