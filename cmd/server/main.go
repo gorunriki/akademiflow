@@ -40,6 +40,7 @@ func main() {
 		})
 	})
 
+	r.POST("/register", userHandler.Register)
 	r.POST("/login", authHandler.Login)
 
 	api := r.Group("/api")
@@ -47,7 +48,6 @@ func main() {
 
 	adminOnly := api.Group("/admin")
 	adminOnly.Use(middleware.RequiredRole("admin"))
-
 	adminOnly.GET("/dashboard", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "welcome admin",

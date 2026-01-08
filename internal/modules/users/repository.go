@@ -4,6 +4,8 @@ import "gorm.io/gorm"
 
 type Repository interface {
 	FindByID(id uint) (*User, error)
+	Create(user *User) error
+	ExistsByEmail(email string) (bool, error)
 }
 
 type repository struct {
@@ -20,4 +22,20 @@ func (r *repository) FindByID(id uint) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+// create new user
+func (r *repository) Create(user *User) error {
+	return r.db.Create(user).Error
+}
+
+func (r *repository) ExistsByEmail(email string) (bool, error) {
+	var count int64
+	err := r.db.Model(&User{}).Where("email = ?", email).Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 }
