@@ -53,6 +53,7 @@ func main() {
 			"message": "welcome admin",
 		})
 	})
+	adminOnly.GET("/users", userHandler.List)
 
 	api.GET("/me", userHandler.Me)
 

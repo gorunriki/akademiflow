@@ -9,6 +9,7 @@ import (
 type Service interface {
 	GetMe(userID uint) (*MeReponse, error)
 	CreateUser(user *User) error
+	GetUsers() ([]UserResponse, error)
 }
 
 type service struct {
@@ -54,4 +55,24 @@ func (s *service) CreateUser(user *User) error {
 	user.Role = "user"
 
 	return s.repo.Create(user)
+}
+
+// get all user
+func (s *service) GetUsers() ([]UserResponse, error) {
+	users, err := s.repo.ListUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]UserResponse, 0, len(users))
+	for _, user := range users {
+		res = append(res, UserResponse{
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+			Role:  user.Role,
+		})
+	}
+
+	return res, nil
 }

@@ -6,6 +6,7 @@ type Repository interface {
 	FindByID(id uint) (*User, error)
 	Create(user *User) error
 	ExistsByEmail(email string) (bool, error)
+	ListUsers() ([]User, error)
 }
 
 type repository struct {
@@ -29,6 +30,7 @@ func (r *repository) Create(user *User) error {
 	return r.db.Create(user).Error
 }
 
+// check email duplication
 func (r *repository) ExistsByEmail(email string) (bool, error) {
 	var count int64
 	err := r.db.Model(&User{}).Where("email = ?", email).Count(&count).Error
@@ -38,4 +40,14 @@ func (r *repository) ExistsByEmail(email string) (bool, error) {
 	}
 
 	return count > 0, nil
+}
+
+// list users
+func (r *repository) ListUsers() ([]User, error) {
+	var users []User
+
+	if err := r.db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
 }

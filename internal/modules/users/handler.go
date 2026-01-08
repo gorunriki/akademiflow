@@ -58,3 +58,16 @@ func (h *Handler) Register(c *gin.Context) {
 		"message": "user registered successfully",
 	})
 }
+
+// list all user
+func (h *Handler) List(c *gin.Context) {
+	users, err := h.service.GetUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed retrieving users"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": users,
+	})
+}
