@@ -9,7 +9,7 @@ import (
 type Service interface {
 	GetMe(userID uint) (*MeReponse, error)
 	CreateUser(user *User) error
-	GetUsers() ([]UserResponse, error)
+	GetUsers(page, limit int) ([]UserResponse, int64, error)
 }
 
 type service struct {
@@ -58,10 +58,24 @@ func (s *service) CreateUser(user *User) error {
 }
 
 // get all user
-func (s *service) GetUsers() ([]UserResponse, error) {
-	users, err := s.repo.ListUsers()
+func (s *service) GetUsers(page, limit int) ([]UserResponse, int64, error) {
+	if page < 1 {
+		page = 1
+	}
+
+	if limit < 1 {
+		limit = 10
+	}
+
+	if limit > 100 {
+		limit = 100
+	}
+
+	offset := (page - 1) * limit
+
+	users, total, err := s.repo.ListUsers(limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	res := make([]UserResponse, 0, len(users))
@@ -74,5 +88,5 @@ func (s *service) GetUsers() ([]UserResponse, error) {
 		})
 	}
 
-	return res, nil
+	return res, total, nil
 }

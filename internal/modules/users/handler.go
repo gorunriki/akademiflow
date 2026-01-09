@@ -2,7 +2,9 @@ package users
 
 import (
 	"errors"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -61,13 +63,24 @@ func (h *Handler) Register(c *gin.Context) {
 
 // list all user
 func (h *Handler) List(c *gin.Context) {
-	users, err := h.service.GetUsers()
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+
+	users, total, err := h.service.GetUsers(page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed retrieving users"})
 		return
 	}
 
+	totalPages := int(math.Ceil(float64(total) / float64(limit)))
+
 	c.JSON(http.StatusOK, gin.H{
 		"data": users,
+		"pagination": gin.H{
+			"page":        page,
+			"limit":       limit,
+			"total":       total,
+			"total_pages": totalPages,
+		},
 	})
 }
