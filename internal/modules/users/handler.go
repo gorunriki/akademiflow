@@ -84,3 +84,27 @@ func (h *Handler) List(c *gin.Context) {
 		},
 	})
 }
+
+// get user details
+func (h *Handler) GetBydID(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid user id",
+		})
+		return
+	}
+
+	user, err := h.service.GetUser(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "user not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": user,
+	})
+}

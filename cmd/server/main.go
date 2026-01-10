@@ -54,6 +54,7 @@ func main() {
 		})
 	})
 	adminOnly.GET("/users", userHandler.List)
+	adminOnly.GET("/users/:id", userHandler.GetBydID)
 
 	api.GET("/me", userHandler.Me)
 

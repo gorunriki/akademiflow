@@ -10,6 +10,7 @@ type Service interface {
 	GetMe(userID uint) (*MeReponse, error)
 	CreateUser(user *User) error
 	GetUsers(page, limit int) ([]UserResponse, int64, error)
+	GetUser(id uint) (*UserResponse, error)
 }
 
 type service struct {
@@ -89,4 +90,19 @@ func (s *service) GetUsers(page, limit int) ([]UserResponse, int64, error) {
 	}
 
 	return res, total, nil
+}
+
+// user details
+func (s *service) GetUser(id uint) (*UserResponse, error) {
+	user, err := s.repo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+		Role:  user.Role,
+	}, nil
 }

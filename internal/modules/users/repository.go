@@ -17,6 +17,7 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repository{db}
 }
 
+// user details
 func (r *repository) FindByID(id uint) (*User, error) {
 	var user User
 	if err := r.db.First(&user, id).Error; err != nil {
