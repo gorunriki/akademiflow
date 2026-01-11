@@ -6,7 +6,7 @@ type Repository interface {
 	FindByID(id uint) (*User, error)
 	Create(user *User) error
 	ExistsByEmail(email string) (bool, error)
-	ListUsers(limit, offset int) ([]User, int64, error)
+	ListUsers(limit int, offset int, keyword string) ([]User, int64, error)
 }
 
 type repository struct {
@@ -44,15 +44,24 @@ func (r *repository) ExistsByEmail(email string) (bool, error) {
 }
 
 // list users
-func (r *repository) ListUsers(limit, offset int) ([]User, int64, error) {
+func (r *repository) ListUsers(limit int, offset int, keyword string) ([]User, int64, error) {
 	var users []User
 	var total int64
 
-	if err := r.db.Model(&User{}).Count(&total).Error; err != nil {
+	query := r.db.Model(&User{})
+
+	if keyword != "" {
+		like := "%" + keyword + "%"
+		query = query.Where(
+			"name ILIKE ? OR email ILIKE ?", like, like,
+		)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	if err := r.db.Limit(limit).Offset(offset).Order("id ASC").Find(&users).Error; err != nil {
+	if err := query.Limit(limit).Offset(offset).Order("id ASC").Find(&users).Error; err != nil {
 		return nil, 0, err
 	}
 

@@ -65,8 +65,9 @@ func (h *Handler) Register(c *gin.Context) {
 func (h *Handler) List(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	keyword := c.Query("q")
 
-	users, total, err := h.service.GetUsers(page, limit)
+	users, total, err := h.service.GetUsers(page, limit, keyword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed retrieving users"})
 		return
