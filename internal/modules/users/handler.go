@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	serr "github.com/gorunriki/akademiflow/internal/shared/errors"
 )
 
 type Handler struct {
@@ -44,10 +45,8 @@ func (h *Handler) Register(c *gin.Context) {
 	}
 
 	if err := h.service.CreateUser(user); err != nil {
-		if errors.Is(err, ErrEmailAlreadyExists) {
-			c.JSON(http.StatusConflict, gin.H{
-				"error": "email already registered",
-			})
+		if errors.Is(err, serr.ErrConflict) {
+			c.Error(err)
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{

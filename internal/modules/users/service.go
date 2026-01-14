@@ -1,8 +1,7 @@
 package users
 
 import (
-	"errors"
-
+	serr "github.com/gorunriki/akademiflow/internal/shared/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -37,15 +36,13 @@ func (s *service) GetMe(userID uint) (*MeReponse, error) {
 
 // create new user
 // TODO 1.HASH PASSWORD, 2.SET ROLE DEFAULT, 3.PANGGIL repo.CreateUser(user)
-var ErrEmailAlreadyExists = errors.New("email already exists")
-
 func (s *service) CreateUser(user *User) error {
 	exists, err := s.repo.ExistsByEmail(user.Email)
 	if err != nil {
 		return err
 	}
 	if exists {
-		return ErrEmailAlreadyExists
+		return serr.ErrConflict
 	}
 
 	hasedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
