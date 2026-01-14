@@ -56,6 +56,7 @@ func main() {
 	})
 	adminOnly.GET("/users", userHandler.List)
 	adminOnly.GET("/users/:id", userHandler.GetBydID)
+	adminOnly.DELETE("/users/:id", userHandler.Delete)
 
 	api.GET("/me", userHandler.Me)
 

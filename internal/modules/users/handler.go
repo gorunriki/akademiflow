@@ -1,7 +1,6 @@
 package users
 
 import (
-	"errors"
 	"math"
 	"net/http"
 	"strconv"
@@ -34,7 +33,7 @@ func (h *Handler) Me(c *gin.Context) {
 func (h *Handler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Error(serr.ErrInvalidInput)
 		return
 	}
 
@@ -45,13 +44,11 @@ func (h *Handler) Register(c *gin.Context) {
 	}
 
 	if err := h.service.CreateUser(user); err != nil {
-		if errors.Is(err, serr.ErrConflict) {
-			c.Error(err)
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to register user",
-		})
+		// if errors.Is(err, serr.ErrConflict) {
+		// 	c.Error(err)
+		// 	return
+		// }
+		c.Error(err)
 		return
 	}
 
@@ -107,4 +104,21 @@ func (h *Handler) GetBydID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"data": user,
 	})
+}
+
+// Delete user
+func (h *Handler) Delete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id <= 0 {
+		c.Error(serr.ErrInvalidInput)
+		return
+	}
+
+	if err := h.service.DeleteUser(uint(id)); err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

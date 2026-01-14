@@ -1,8 +1,11 @@
 package users
 
 import (
+	"errors"
+
 	serr "github.com/gorunriki/akademiflow/internal/shared/errors"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type Service interface {
@@ -10,6 +13,7 @@ type Service interface {
 	CreateUser(user *User) error
 	GetUsers(page int, limit int, keyword string) ([]UserResponse, int64, error)
 	GetUser(id uint) (*UserResponse, error)
+	DeleteUser(id uint) error
 }
 
 type service struct {
@@ -102,4 +106,15 @@ func (s *service) GetUser(id uint) (*UserResponse, error) {
 		Email: user.Email,
 		Role:  user.Role,
 	}, nil
+}
+
+// Delete user
+func (s *service) DeleteUser(id uint) error {
+	if err := s.repo.Delete(id); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return serr.ErrNotFound
+		}
+		return err
+	}
+	return nil
 }

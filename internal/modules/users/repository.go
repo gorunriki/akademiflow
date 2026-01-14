@@ -7,6 +7,7 @@ type Repository interface {
 	Create(user *User) error
 	ExistsByEmail(email string) (bool, error)
 	ListUsers(limit int, offset int, keyword string) ([]User, int64, error)
+	Delete(id uint) error
 }
 
 type repository struct {
@@ -66,4 +67,17 @@ func (r *repository) ListUsers(limit int, offset int, keyword string) ([]User, i
 	}
 
 	return users, total, nil
+}
+
+// Delete user
+func (r *repository) Delete(id uint) error {
+	var user User
+	result := r.db.Delete(&user, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }

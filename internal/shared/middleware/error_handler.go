@@ -17,21 +17,38 @@ func ErrorHandler() gin.HandlerFunc {
 
 		err := c.Errors.Last().Err
 
+		status := http.StatusInternalServerError
+		code := "INTERNAL_ERROR"
+		message := "internal server error"
+
 		switch err {
 		case serr.ErrInvalidInput:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
-		case serr.ErrNotFound:
-			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
-		case serr.ErrConflict:
-			c.JSON(http.StatusConflict, gin.H{"error": "conflict"})
+			status = http.StatusBadRequest
+			code = "INVALID_INPUT"
+			message = "invalid request data"
 		case serr.ErrUnauthorized:
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			status = http.StatusUnauthorized
+			code = "UNAUTHORIZED"
+			message = "unauthorized"
 		case serr.ErrForbidden:
-			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
-		default:
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "internal server error",
-			})
+			status = http.StatusForbidden
+			code = "FORBIDDEN"
+			message = "forbidden"
+		case serr.ErrNotFound:
+			status = http.StatusNotFound
+			code = "NOT_FOUND"
+			message = "resource not found"
+		case serr.ErrConflict:
+			status = http.StatusConflict
+			code = "CONFLICT"
+			message = "resource already exists"
 		}
+
+		c.JSON(status, gin.H{
+			"error": gin.H{
+				"code":    code,
+				"message": message,
+			},
+		})
 	}
 }
