@@ -125,8 +125,8 @@ func (h *Handler) Delete(c *gin.Context) {
 
 // Update user role
 func (h *Handler) UpdateRole(c *gin.Context) {
-	var req UpdateRoleRequest
 	id, err := strconv.Atoi(c.Param("id"))
+	var req UpdateRoleRequest
 	if err != nil || id <= 0 {
 		c.Error(serr.ErrInvalidInput)
 		return
@@ -135,7 +135,17 @@ func (h *Handler) UpdateRole(c *gin.Context) {
 		c.Error(serr.ErrInvalidInput)
 		return
 	}
-	if err := h.service.UpdateUserRole(uint(id), req.Role); err != nil {
+	val, exists := c.Get("user_id")
+	if !exists {
+		c.Error(serr.ErrUnauthorized)
+		return
+	}
+	currentUserID, ok := val.(uint)
+	if !ok {
+		c.Error(serr.ErrUnauthorized)
+		return
+	}
+	if err := h.service.UpdateUserRole(uint(id), req.Role, currentUserID); err != nil {
 		c.Error(err)
 		return
 	}
