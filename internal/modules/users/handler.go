@@ -122,3 +122,24 @@ func (h *Handler) Delete(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+// Update user role
+func (h *Handler) UpdateRole(c *gin.Context) {
+	var req UpdateRoleRequest
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id <= 0 {
+		c.Error(serr.ErrInvalidInput)
+		return
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(serr.ErrInvalidInput)
+		return
+	}
+	if err := h.service.UpdateUserRole(uint(id), req.Role); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "user role updated",
+	})
+}

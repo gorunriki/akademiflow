@@ -19,3 +19,7 @@ type UserResponse struct {
 	Email string `json:"email"`
 	Role  string `json:"role"`
 }
+
+type UpdateRoleRequest struct {
+	Role string `json:"role" binding:"required"`
+}

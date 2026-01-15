@@ -14,6 +14,7 @@ type Service interface {
 	GetUsers(page int, limit int, keyword string) ([]UserResponse, int64, error)
 	GetUser(id uint) (*UserResponse, error)
 	DeleteUser(id uint) error
+	UpdateUserRole(id uint, role string) error
 }
 
 type service struct {
@@ -111,6 +112,20 @@ func (s *service) GetUser(id uint) (*UserResponse, error) {
 // Delete user
 func (s *service) DeleteUser(id uint) error {
 	if err := s.repo.Delete(id); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return serr.ErrNotFound
+		}
+		return err
+	}
+	return nil
+}
+
+// Update user role
+func (s *service) UpdateUserRole(id uint, role string) error {
+	if role != "admin" && role != "user" {
+		return serr.ErrInvalidInput
+	}
+	if err := s.repo.UpdateRole(id, role); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return serr.ErrNotFound
 		}

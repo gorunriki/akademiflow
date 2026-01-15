@@ -8,6 +8,7 @@ type Repository interface {
 	ExistsByEmail(email string) (bool, error)
 	ListUsers(limit int, offset int, keyword string) ([]User, int64, error)
 	Delete(id uint) error
+	UpdateRole(id uint, role string) error
 }
 
 type repository struct {
@@ -73,6 +74,18 @@ func (r *repository) ListUsers(limit int, offset int, keyword string) ([]User, i
 func (r *repository) Delete(id uint) error {
 	var user User
 	result := r.db.Delete(&user, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
+
+// update user role
+func (r *repository) UpdateRole(id uint, role string) error {
+	result := r.db.Model(&User{}).Where("id = ?", id).Update("role", role)
 	if result.Error != nil {
 		return result.Error
 	}
