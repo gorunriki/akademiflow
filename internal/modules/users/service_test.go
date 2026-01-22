@@ -28,12 +28,20 @@ func (f *fakeRepo) ExistsByEmail(email string) (bool, error) {
 	return true, nil
 }
 
-func (f *fakeRepo) ListUsers(limit int, offset int, keyword string) ([]User, int64, error) {
+func (f *fakeRepo) ListUsers(limit int, offset int, keyword string, includeDeleted bool) ([]User, int64, error) {
 	return nil, 0, nil
 }
 
 func (f *fakeRepo) Delete(id uint) error {
 	return f.updateErr
+}
+
+func (f *fakeRepo) Restore(id uint) error {
+	return nil
+}
+
+func (f *fakeRepo) FindByIDIncludingDeleted(id uint) (*User, error) {
+	return nil, nil
 }
 
 func newTestService(repoErr error) *service {

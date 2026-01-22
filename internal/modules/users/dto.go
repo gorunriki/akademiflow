@@ -1,5 +1,7 @@
 package users
 
+import "time"
+
 type MeReponse struct {
 	ID    uint   `json:"id"`
 	Name  string `json:"name"`
@@ -14,10 +16,11 @@ type RegisterRequest struct {
 }
 
 type UserResponse struct {
-	ID    uint   `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	ID        uint       `json:"id"`
+	Name      string     `json:"name"`
+	Email     string     `json:"email"`
+	Role      string     `json:"role"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 }
 
 type UpdateRoleRequest struct {

@@ -1,7 +1,6 @@
 package users
 
 import (
-	"math"
 	"net/http"
 	"strconv"
 
@@ -59,17 +58,22 @@ func (h *Handler) Register(c *gin.Context) {
 
 // list all user
 func (h *Handler) List(c *gin.Context) {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
+		page = 1
+	}
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if err != nil {
+		limit = 10
+	}
+	includeDeleted, _ := strconv.ParseBool(c.DefaultQuery("include_deleted", "false"))
 	keyword := c.Query("q")
 
-	users, total, err := h.service.GetUsers(page, limit, keyword)
+	users, total, totalPages, err := h.service.GetUsers(page, limit, keyword, includeDeleted)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed retrieving users"})
+		c.Error(err)
 		return
 	}
-
-	totalPages := int(math.Ceil(float64(total) / float64(limit)))
 
 	c.JSON(http.StatusOK, gin.H{
 		"data": users,
@@ -125,8 +129,8 @@ func (h *Handler) Delete(c *gin.Context) {
 
 // Update user role
 func (h *Handler) UpdateRole(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
 	var req UpdateRoleRequest
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
 		c.Error(serr.ErrInvalidInput)
 		return
@@ -152,4 +156,20 @@ func (h *Handler) UpdateRole(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "user role updated",
 	})
+}
+
+// Restore user
+func (h *Handler) Restore(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id <= 0 {
+		c.Error(serr.ErrInvalidInput)
+		return
+	}
+
+	if err := h.service.RestoreUser(uint(id)); err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "user restored"})
 }

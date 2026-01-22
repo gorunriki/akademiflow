@@ -2,6 +2,8 @@ package users
 
 import (
 	"errors"
+	"math"
+	"time"
 
 	serr "github.com/gorunriki/akademiflow/internal/shared/errors"
 	"golang.org/x/crypto/bcrypt"
@@ -11,10 +13,11 @@ import (
 type Service interface {
 	GetMe(userID uint) (*MeReponse, error)
 	CreateUser(user *User) error
-	GetUsers(page int, limit int, keyword string) ([]UserResponse, int64, error)
+	GetUsers(page int, limit int, keyword string, includeDeleted bool) ([]UserResponse, int64, int64, error)
 	GetUser(id uint) (*UserResponse, error)
 	DeleteUser(id uint) error
 	UpdateUserRole(targetID uint, newRole string, currentUserID uint) error
+	RestoreUser(id uint) error
 }
 
 type service struct {
@@ -61,7 +64,7 @@ func (s *service) CreateUser(user *User) error {
 }
 
 // get all user
-func (s *service) GetUsers(page int, limit int, keyword string) ([]UserResponse, int64, error) {
+func (s *service) GetUsers(page int, limit int, keyword string, includeDeleted bool) ([]UserResponse, int64, int64, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -76,22 +79,30 @@ func (s *service) GetUsers(page int, limit int, keyword string) ([]UserResponse,
 
 	offset := (page - 1) * limit
 
-	users, total, err := s.repo.ListUsers(limit, offset, keyword)
+	users, total, err := s.repo.ListUsers(limit, offset, keyword, includeDeleted)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, 0, err
 	}
+
+	totalPages := int64(math.Ceil(float64(total) / float64(limit)))
 
 	res := make([]UserResponse, 0, len(users))
 	for _, user := range users {
+		var deletedAt *time.Time
+		if user.DeletedAt.Valid {
+			t := user.DeletedAt.Time
+			deletedAt = &t
+		}
 		res = append(res, UserResponse{
-			ID:    user.ID,
-			Name:  user.Name,
-			Email: user.Email,
-			Role:  user.Role,
+			ID:        user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			Role:      user.Role,
+			DeletedAt: deletedAt,
 		})
 	}
 
-	return res, total, nil
+	return res, total, totalPages, nil
 }
 
 // user details
@@ -134,5 +145,26 @@ func (s *service) UpdateUserRole(targetID uint, newRole string, currentUserID ui
 		}
 		return err
 	}
+	return nil
+}
+
+// Restore deleted user
+func (s *service) RestoreUser(id uint) error {
+	user, err := s.repo.FindByIDIncludingDeleted(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return serr.ErrNotFound
+		}
+		return err
+	}
+
+	if !user.DeletedAt.Valid {
+		return serr.ErrInvalidInput
+	}
+
+	if err := s.repo.Restore(id); err != nil {
+		return err
+	}
+
 	return nil
 }
