@@ -106,12 +106,9 @@ Body:
   "role": "admin"
 }
 ```
----
 
 ### Delete User (soft delete)
 DELETE /api/admin/users/:id
-
----
 
 ### Restore User
 PATCH /api/admin/users/:id/restore
@@ -138,5 +135,5 @@ PATCH /api/admin/users/:id/restore
 ---
 
 ## Author
-Personal project by Riky
+Personal project by Riky.  
 Fokus pada backend engineering, clean architecture, dan real world patterns.
