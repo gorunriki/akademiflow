@@ -96,8 +96,6 @@ Query Params:
 - `q` (search name/email)
 - `include_deleted` (true / false)
 
----
-
 ### Update User Role
 PATCH /api/admin/users/:id/role
 Body:
