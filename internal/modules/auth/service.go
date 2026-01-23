@@ -38,12 +38,12 @@ func (s *service) Login(req LoginRequest) (string, error) {
 		return "", errors.New("invalid email or password")
 	}
 
-	expired, _ := time.ParseDuration(s.config.JWTExpiredIn)
+	// expired, _ := time.ParseDuration(s.config.JWTExpiredIn)
 
 	claims := jwt.MapClaims{
 		"user_id": user.ID,
 		"role":    user.Role,
-		"exp":     time.Now().Add(expired).Unix(),
+		"exp":     time.Now().Add(24 * time.Hour).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

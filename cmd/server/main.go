@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorunriki/akademiflow/internal/modules/attendance"
 	"github.com/gorunriki/akademiflow/internal/modules/auth"
 	"github.com/gorunriki/akademiflow/internal/modules/users"
 	"github.com/gorunriki/akademiflow/internal/shared/middleware"
@@ -26,6 +27,10 @@ func main() {
 	userService := users.NewService(userRepo)
 	userHandler := users.NewHandler(userService)
 
+	attendanceRepo := attendance.NewRepository(db)
+	attendanceService := attendance.NewService(attendanceRepo)
+	attendanceHandler := attendance.NewHandler(attendanceService)
+
 	// DB migrate
 	database.Migrate(db)
 	database.Seed(db)
@@ -45,10 +50,12 @@ func main() {
 	r.POST("/login", authHandler.Login)
 
 	api := r.Group("/api")
-	api.Use(middleware.Auth(cfg))
+	api.Use(middleware.Auth(cfg)) // jwt
+
+	api.POST("/attendance", attendanceHandler.CreateAttendance)
 
 	adminOnly := api.Group("/admin")
-	adminOnly.Use(middleware.RequiredRole("admin"))
+	adminOnly.Use(middleware.RequiredRole("admin")) // rbac
 	adminOnly.GET("/dashboard", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "welcome admin",
