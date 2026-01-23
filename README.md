@@ -106,7 +106,7 @@ PostgreSQL
 
 ---
 
-## 🗑️ Soft Delete User Flow
+## Soft Delete User Flow
 
 DELETE /api/admin/users/:id
   ↓
@@ -142,7 +142,7 @@ Database
 
 ---
 
-## 📄 API Overview (Ringkas)
+## API Overview (Ringkas)
 
 ### List Users
 GET /api/admin/users
